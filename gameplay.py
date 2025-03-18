@@ -7,8 +7,8 @@ pygame.init()
 def DamageGameplay(enemy, character):
     
     enemy_health = enemy.health
-    chracter_attack = character.attack
+    character_attack = character.attack
 
-    damage = Damage.damage(chracter_attack, enemy_health )
+    damage = Damage.damage(character_attack, enemy_health )
 
     enemy.take_damage(damage)
