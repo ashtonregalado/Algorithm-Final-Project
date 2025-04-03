@@ -30,7 +30,7 @@ class Enemy(pygame.sprite.Sprite):
         self.health -= damage
         if self.health <= 0:
             self.health = 0
-            self.alive = False  # Mark enemy as destroyed
+            self.alive = False  
             
 
     def draw(self, screen):
@@ -38,7 +38,8 @@ class Enemy(pygame.sprite.Sprite):
         if self.alive:
             screen.blit(self.image, self.rect.topleft)
 
-            # Center the text on the enemy
             text_surface = self.font.render(str(self.health), True, (0, 0, 0))
             text_rect = text_surface.get_rect(center=self.rect.center)
             screen.blit(text_surface, text_rect)
+
+        return self.alive
