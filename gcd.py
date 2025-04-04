@@ -1,7 +1,7 @@
 #gcd.py
 def gcd(x: int, y: int) -> int:
     while y:
-        x, y = y, x % y  # Correct swapping
+        x, y = y, x % y 
     return x
 
 print(gcd(56, 42))  # Output: 14

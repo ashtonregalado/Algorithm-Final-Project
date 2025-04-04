@@ -2,7 +2,7 @@ import pygame
 from character import Character
 from enemy import Enemy
 from damage import Damage
-from gameplay import DamageGameplay
+from gameplay import  EnemyDamageGameplay, CharacterDamageGameplay
 from bullet import Bullet
 from damage_text import DamageText
 from adjust_stats import AdjustStats
@@ -17,13 +17,13 @@ pygame.display.set_caption("Euclid's Algorithm")
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 
-enemy = Enemy(700, 400, 1001)
-character = Character(200, 400, 73)
+enemy = Enemy(700, 400, 43, 200)
+character = Character(200, 400, 73, 150)
 
-bullets = []
-damage_texts = []
-
-
+character_bullets = []
+character_damage_texts = []
+enemy_bullets = []
+enemy_damage_texts = []
 
 
 def main():
@@ -45,8 +45,11 @@ def main():
                 running = False
 
             if event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_SPACE:
-                    bullets.append(Bullet(character.x + 20, character.y + 10))
+                if event.key == pygame.K_SPACE and character.alive:
+                    character_bullets.append(Bullet(character.x + 20, character.y + 10))
+
+                if event.key == pygame.K_RETURN and enemy.alive:
+                    enemy_bullets.append(Bullet(enemy.x - 10, enemy.y + 10, direction = -1))
                     
             
 
@@ -64,8 +67,8 @@ def main():
                 elif not (character_add_button.collidepoint(event.pos) or 
                           character_subtract_button.collidepoint(event.pos) or 
                           enemy_add_button.collidepoint(event.pos) or 
-                          enemy_subtract_button.collidepoint(event.pos)):
-                    bullets.append(Bullet(character.x + 20, character.y + 10))
+                          enemy_subtract_button.collidepoint(event.pos) ) and  character.alive:
+                    character_bullets.append(Bullet(character.x + 20, character.y + 10, ))
 
         keys = pygame.key.get_pressed()
 
@@ -79,32 +82,59 @@ def main():
             target_y += character.speed
 
 
-        for bullet in bullets:
+        for bullet in character_bullets:
+            bullet.update()
+
+        for bullet in enemy_bullets:
             bullet.update()
 
         if enemy.alive:
-            for bullet in bullets[:]:
+            for bullet in character_bullets[:]:
                 if bullet.rect.colliderect(enemy.rect):
-                    bullets.remove(bullet)
-                    DamageGameplay(enemy, character)
+                    character_bullets.remove(bullet)
+                    EnemyDamageGameplay(enemy, character)
                     if enemy.alive:
-                       damage_texts.append(DamageText(enemy.x + 10, enemy.y + -20, Damage.damage(character.attack, enemy.health)))
+                       character_damage_texts.append(DamageText(enemy.x + 10, enemy.y + -20, Damage.damage(character.attack, enemy.health)))
+        
+        if character.alive:
+            for bullet in enemy_bullets[:]:
+                if bullet.rect.colliderect(character.rect):
+                    enemy_bullets.remove(bullet)
+                    CharacterDamageGameplay( character, enemy)
+                    if character.alive:
+                        enemy_damage_texts.append(DamageText(character.x + 10, character.y + -20, Damage.damage(enemy.attack, character.health)))
             
-        bullets[:] = [bullet for bullet in bullets if bullet.active]
+        character_bullets[:] = [bullet for bullet in character_bullets if bullet.active]
+        enemy_bullets[:] = [bullet for bullet in enemy_bullets if bullet.active]
 
-        for bullet in bullets:
+        for bullet in character_bullets:
+            bullet.draw(screen)
+        
+        for bullet in enemy_bullets:
             bullet.draw(screen)
 
-        for dmg in damage_texts[:]:
+        for dmg in character_damage_texts[:]:
             dmg.update()
             if dmg.duration <= 0:
-                damage_texts.remove(dmg)
+                character_damage_texts.remove(dmg)
 
-        for dmg in damage_texts:
+        for dmg in enemy_damage_texts[:]:
+            dmg.update()
+            if dmg.duration <= 0:
+                enemy_damage_texts.remove(dmg)
+
+        for dmg in character_damage_texts:
             dmg.draw(screen)
 
-        character.move(target_x, target_y)
-        character.draw(screen)
+        for dmg in enemy_damage_texts:
+            dmg.draw(screen)
+
+        if character.health <= 0:
+            character.alive = False
+        
+        if character.alive:
+            character.move(target_x, target_y)
+            character.draw(screen)
 
         if enemy.health <= 0:
             enemy.alive = False

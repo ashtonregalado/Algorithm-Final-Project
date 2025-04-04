@@ -1,1 +1,1 @@
-to run the game, run game.py
+to run the game, run 'python game.py'

@@ -1,10 +1,11 @@
 import pygame
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, health, width=40, height=90, color=(255, 0, 0)):
+    def __init__(self, x, y,attack, health, width=40, height=90, color=(255, 0, 0)):
         super().__init__()
         self.x = x
         self.y = y
+        self.attack = attack
         self.health = health
         self.width = width
         self.height = height
@@ -24,6 +25,9 @@ class Enemy(pygame.sprite.Sprite):
 
     def full_health(self):
         return self.health
+    
+    def attack_power(self):
+        return self.attack
 
     def take_damage(self, damage: int):
         """Reduces health and marks enemy as destroyed if needed."""
@@ -34,12 +38,18 @@ class Enemy(pygame.sprite.Sprite):
             
 
     def draw(self, screen):
-        """Draws the enemy and displays health if it's still alive."""
+        """Draws the enemy, displaying attack above and health in the middle."""
         if self.alive:
             screen.blit(self.image, self.rect.topleft)
 
-            text_surface = self.font.render(str(self.health), True, (0, 0, 0))
-            text_rect = text_surface.get_rect(center=self.rect.center)
-            screen.blit(text_surface, text_rect)
+            attack_surface = self.font.render(f"ATK: {self.attack}", True, (0, 0, 0))
+            attack_rect = attack_surface.get_rect(midbottom=(self.rect.centerx, self.rect.top - 5))
+            screen.blit(attack_surface, attack_rect)
+
+
+            health_surface = self.font.render(f"{self.health}", True, (255, 255, 255))
+            health_rect = health_surface.get_rect(center=self.rect.center)
+            screen.blit(health_surface, health_rect)
 
         return self.alive
+
