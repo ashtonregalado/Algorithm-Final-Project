@@ -31,19 +31,27 @@ class Character(pygame.sprite.Sprite):
     def attack_power(self):
         return self.attack
     
-    def move(self, target_x, target_y):
+    #still has an error where the movement is not responsive when cahracter is at the edge
+    def move(self, target_x, target_y, screen_width, screen_height):
         dx = target_x - self.x
         dy = target_y - self.y
 
         if dx == 0 and dy == 0:
             return
-        
-        gcd_value = gcd(abs(dx), abs(dy)) 
+
+        gcd_value = gcd(abs(dx), abs(dy))
         step_x = dx // gcd_value if gcd_value != 0 else 0
         step_y = dy // gcd_value if gcd_value != 0 else 0
 
-        self.x += step_x * self.speed
-        self.y += step_y * self.speed
+        # Predict next position
+        next_x = self.x + step_x * self.speed
+        next_y = self.y + step_y * self.speed
+
+        # Keep inside screen boundaries
+        if 0 <= next_x <= screen_width - self.width:
+            self.x = next_x
+        if 0 <= next_y <= screen_height - self.height:
+            self.y = next_y
 
         self.rect.topleft = (self.x, self.y)
 

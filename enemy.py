@@ -1,5 +1,5 @@
 import pygame
-
+import math
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y,attack, health, width=40, height=90, color=(255, 0, 0)):
         super().__init__()
@@ -11,7 +11,10 @@ class Enemy(pygame.sprite.Sprite):
         self.height = height
         self.color = color
         self.font = pygame.font.Font(None, 18)
-        self.alive = True  # Tracks if enemy is still active
+        self.alive = True  
+
+        self.direction = -1
+        self.speed = 2
 
         # Load enemy sprite (fallback to rectangle if not using images)
         try:
@@ -28,6 +31,19 @@ class Enemy(pygame.sprite.Sprite):
     
     def attack_power(self):
         return self.attack
+    
+    def move(self, screen_width, screen_height):
+        if not self.alive:
+            return
+
+        self.x += int(math.sin(pygame.time.get_ticks() / 300) * 1.5)  # slight vertical wiggle
+       
+        self.y +=  self.direction * self.speed
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+        if self.rect.left <= 0 or self.rect.right >= screen_width or self.rect.top <= 0 or self.rect.bottom >= screen_height:
+            self.direction *= -1
 
     def take_damage(self, damage: int):
         """Reduces health and marks enemy as destroyed if needed."""

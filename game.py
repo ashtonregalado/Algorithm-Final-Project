@@ -1,4 +1,5 @@
 import pygame
+import random
 from character import Character
 from enemy import Enemy
 from damage import Damage
@@ -30,6 +31,10 @@ def main():
     running = True
     clock = pygame.time.Clock()
     target_x, target_y = character.x, character.y
+    enemy_fire_delay = random.randint(10, 1000)
+    last_enemy_fire_time = pygame.time.get_ticks()
+
+    print(enemy_fire_delay)
 
     while running:
         screen.fill(WHITE)
@@ -48,10 +53,8 @@ def main():
                 if event.key == pygame.K_SPACE and character.alive:
                     character_bullets.append(Bullet(character.x + 20, character.y + 10))
 
-                if event.key == pygame.K_RETURN and enemy.alive:
-                    enemy_bullets.append(Bullet(enemy.x - 10, enemy.y + 10, direction = -1))
-                    
-            
+
+
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 
@@ -70,6 +73,14 @@ def main():
                           enemy_subtract_button.collidepoint(event.pos) ) and  character.alive:
                     character_bullets.append(Bullet(character.x + 20, character.y + 10, ))
 
+        current_time = pygame.time.get_ticks()
+        if current_time - last_enemy_fire_time >= enemy_fire_delay and enemy.alive:
+            enemy_bullets.append(Bullet(enemy.x - 10, enemy.y + 10, direction = -1))
+            last_enemy_fire_time = current_time
+            enemy_fire_delay = random.randint(10,1000)
+           
+            
+            
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
@@ -95,7 +106,9 @@ def main():
                     EnemyDamageGameplay(enemy, character)
                     if enemy.alive:
                        character_damage_texts.append(DamageText(enemy.x + 10, enemy.y + -20, Damage.damage(character.attack, enemy.health)))
-        
+            
+            
+            
         if character.alive:
             for bullet in enemy_bullets[:]:
                 if bullet.rect.colliderect(character.rect):
@@ -133,13 +146,14 @@ def main():
             character.alive = False
         
         if character.alive:
-            character.move(target_x, target_y)
+            character.move(target_x, target_y, WIDTH, HEIGTH)
             character.draw(screen)
 
         if enemy.health <= 0:
             enemy.alive = False
         
         if enemy.alive:
+            enemy.move(WIDTH, HEIGTH)
             enemy.draw(screen)
         
         pygame.display.flip()
