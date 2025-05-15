@@ -3,7 +3,7 @@ from gcd import gcd
 
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, x, y, attack,health, speed = 3, width = 40, height= 40, color= (0, 0, 255)):
+    def __init__(self, x, y, attack,health, speed = 3, width = 40, height= 40, color= (0, 0, 255), boundary_rect=None):
         
         self.x = x
         self.y = y
@@ -13,6 +13,7 @@ class Character(pygame.sprite.Sprite):
         self.width = width
         self.height = height
         self.color = color
+        self.boundary_rect = boundary_rect 
         self.font = pygame.font.Font(None, 18)
         self.alive = True 
 
@@ -33,6 +34,9 @@ class Character(pygame.sprite.Sprite):
     
     #still has an error where the movement is not responsive when cahracter is at the edge
     def move(self, target_x, target_y, screen_width, screen_height):
+        if not self.alive:
+            return
+
         dx = target_x - self.x
         dy = target_y - self.y
 
@@ -43,15 +47,21 @@ class Character(pygame.sprite.Sprite):
         step_x = dx // gcd_value if gcd_value != 0 else 0
         step_y = dy // gcd_value if gcd_value != 0 else 0
 
-        # Predict next position
         next_x = self.x + step_x * self.speed
         next_y = self.y + step_y * self.speed
 
-        # Keep inside screen boundaries
-        if 0 <= next_x <= screen_width - self.width:
-            self.x = next_x
-        if 0 <= next_y <= screen_height - self.height:
-            self.y = next_y
+        # Priority 1: respect custom boundary if it exists
+        if self.boundary_rect:
+            if self.boundary_rect.left <= next_x <= self.boundary_rect.right - self.width:
+                self.x = next_x
+            if self.boundary_rect.top <= next_y <= self.boundary_rect.bottom - self.height:
+                self.y = next_y
+        else:
+            # fallback: screen boundaries
+            if 0 <= next_x <= screen_width - self.width:
+                self.x = next_x
+            if 0 <= next_y <= screen_height - self.height:
+                self.y = next_y
 
         self.rect.topleft = (self.x, self.y)
 

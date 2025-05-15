@@ -10,16 +10,26 @@ from adjust_stats import AdjustStats
 
 pygame.init()
 
-WIDTH,HEIGTH = 800, 600
+WIDTH,HEIGHT = 800, 600
 grid_size = 30
-screen = pygame.display.set_mode((WIDTH, HEIGTH), pygame.RESIZABLE)
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Euclid's Algorithm")
 
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 
-enemy = Enemy(700, 400, 43, 200)
-character = Character(200, 400, 73, 150)
+# boundary_margin = 100
+# boundary_width = WIDTH - 2 * boundary_margin
+# boundary_height = HEIGHT - 2 * boundary_margin
+# enemy_boundary = pygame.Rect(boundary_margin, boundary_margin, boundary_width, boundary_height)
+
+character_boundary = pygame.Rect(0, 0, WIDTH // 2, HEIGHT)
+enemy_boundary = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
+
+
+
+enemy = Enemy(700, 400, 43, 200, boundary_rect=enemy_boundary)
+character = Character(200, 400, 73, 150, boundary_rect=character_boundary)
 
 character_bullets = []
 character_damage_texts = []
@@ -146,14 +156,14 @@ def main():
             character.alive = False
         
         if character.alive:
-            character.move(target_x, target_y, WIDTH, HEIGTH)
+            character.move(target_x, target_y, WIDTH, HEIGHT)
             character.draw(screen)
 
         if enemy.health <= 0:
             enemy.alive = False
         
         if enemy.alive:
-            enemy.move(WIDTH, HEIGTH)
+            enemy.move()
             enemy.draw(screen)
         
         pygame.display.flip()

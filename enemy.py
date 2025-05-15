@@ -1,8 +1,9 @@
 import pygame
 import math
+import random
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y,attack, health, width=40, height=90, color=(255, 0, 0)):
-        super().__init__()
+    def __init__(self, x, y, attack, health, width=40, height=90, color=(255, 0, 0), boundary_rect=None):
+        # super().__init__()
         self.x = x
         self.y = y
         self.attack = attack
@@ -16,6 +17,13 @@ class Enemy(pygame.sprite.Sprite):
         self.direction = -1
         self.speed = 2
 
+        while True:
+            self.dx = random.choice([-1, 1]) * self.speed
+            self.dy = random.choice([-1, 1]) * self.speed
+            if self.dx != 0 and self.dy != 0:
+                break
+
+        self.boundary = boundary_rect
         # Load enemy sprite (fallback to rectangle if not using images)
         try:
             self.image = pygame.image.load("assets/enemy.png")
@@ -32,18 +40,54 @@ class Enemy(pygame.sprite.Sprite):
     def attack_power(self):
         return self.attack
     
-    def move(self, screen_width, screen_height):
+    @staticmethod
+    def random_direction(speed):
+        angle = random.uniform(0, 2 * math.pi)
+        return math.cos(angle) * speed, math.sin(angle) * speed
+
+    def move(self):
         if not self.alive:
             return
 
-        self.x += int(math.sin(pygame.time.get_ticks() / 300) * 1.5)  # slight vertical wiggle
-       
-        self.y +=  self.direction * self.speed
-        self.rect.x = self.x
-        self.rect.y = self.y
+        # Move using float precision
+        self.x += self.dx
+        self.y += self.dy
 
-        if self.rect.left <= 0 or self.rect.right >= screen_width or self.rect.top <= 0 or self.rect.bottom >= screen_height:
-            self.direction *= -1
+        # Update rect for display (use int conversion for rendering)
+        self.rect.topleft = (int(self.x), int(self.y))
+
+        if self.boundary:
+            bounced = False
+
+            # Create a temp rect from float x/y
+            temp_rect = pygame.Rect(int(self.x), int(self.y), self.width, self.height)
+
+            if not self.boundary.contains(temp_rect):
+                temp_rect.clamp_ip(self.boundary)
+                self.x, self.y = temp_rect.topleft
+                bounced = True
+
+            # Left/right
+            if temp_rect.left <= self.boundary.left:
+                self.x = self.boundary.left
+                bounced = True
+            elif temp_rect.right >= self.boundary.right:
+                self.x = self.boundary.right - self.width
+                bounced = True
+
+            # Top/bottom
+            if temp_rect.top <= self.boundary.top:
+                self.y = self.boundary.top
+                bounced = True
+            elif temp_rect.bottom >= self.boundary.bottom:
+                self.y = self.boundary.bottom - self.height
+                bounced = True
+
+            if bounced:
+                self.dx, self.dy = self.random_direction(self.speed)
+
+        self.rect.topleft = (int(self.x), int(self.y))
+
 
     def take_damage(self, damage: int):
         """Reduces health and marks enemy as destroyed if needed."""
