@@ -8,6 +8,7 @@ class Enemy(pygame.sprite.Sprite):
         self.y = y
         self.attack = attack
         self.health = health
+        self.max_health = health
         self.width = width
         self.height = height
         self.color = color

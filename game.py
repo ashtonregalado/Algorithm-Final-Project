@@ -6,6 +6,7 @@ from damage import Damage
 from gameplay import  EnemyDamageGameplay, CharacterDamageGameplay
 from bullet import Bullet
 from damage_text import DamageText
+from gcd import gcd
 from adjust_stats import AdjustStats
 
 pygame.init()
@@ -209,6 +210,13 @@ def main():
 
         # Check if all enemies in the current wave are dead
         if all(not e.alive for e in current_wave):
+            wave_gcd_attack_bonus = sum(gcd(character.attack, e.attack) for e in current_wave)
+            wave_gcd_health_bonus = sum(gcd(character.health, e.max_health)for e in current_wave)
+            character.attack += wave_gcd_attack_bonus
+            character.health += wave_gcd_health_bonus
+
+
+            
             wave_index += 1
             if wave_index < len(enemies):
                 next_wave = enemies[wave_index]
