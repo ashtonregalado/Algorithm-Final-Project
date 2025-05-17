@@ -3,7 +3,7 @@ from gcd import gcd
 
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, x, y, attack,health, speed = 3, width = 40, height= 40, color= (0, 0, 255), boundary_rect=None):
+    def __init__(self, x, y, attack,health, speed = 3, width = 40, height= 40, color= (0, 0, 255), boundary_rect=None, is_character = False):
         
         self.x = x
         self.y = y
@@ -14,6 +14,7 @@ class Character(pygame.sprite.Sprite):
         self.height = height
         self.color = color
         self.boundary_rect = boundary_rect 
+        self.is_character = is_character
         self.font = pygame.font.Font(None, 18)
         self.alive = True 
 

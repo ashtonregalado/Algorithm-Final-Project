@@ -18,33 +18,48 @@ pygame.display.set_caption("Euclid's Algorithm")
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 
-# boundary_margin = 100
-# boundary_width = WIDTH - 2 * boundary_margin
-# boundary_height = HEIGHT - 2 * boundary_margin
-# enemy_boundary = pygame.Rect(boundary_margin, boundary_margin, boundary_width, boundary_height)
-
 character_boundary = pygame.Rect(0, 0, WIDTH // 2, HEIGHT)
 enemy_boundary = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
-
-
 
 soldier_1 = Enemy(700, 200, 50, 200, boundary_rect=enemy_boundary)
 soldier_2 = Enemy(700, 400, 50, 200, boundary_rect=enemy_boundary)
 soldier_3 = Enemy(700, 600, 50, 200, boundary_rect=enemy_boundary)
 
-general_1 = Enemy(700, 200, 100, 500, boundary_rect=enemy_boundary)
-general_2 = Enemy(700, 600, 100, 500, boundary_rect=enemy_boundary)
+general_1 = Enemy(700, 200, 100, 500, boundary_rect=enemy_boundary, is_general = True)
+general_2 = Enemy(700, 600, 100, 500, boundary_rect=enemy_boundary, is_general = True)
 
-final_boss = Enemy(700, 400, 500, 1000, boundary_rect=enemy_boundary)
+final_boss = Enemy(700, 400, 500, 1000, boundary_rect=enemy_boundary, is_final_boss=True)
 
 enemies = [[soldier_1, soldier_2, soldier_3], [general_1, general_2], final_boss]
 
-character = Character(200, 400, 100, 1312, boundary_rect=character_boundary)
+character = Character(200, 400, 100, 1312, boundary_rect=character_boundary, is_character=True)
 
 character_bullets = []
 character_damage_texts = []
 enemy_bullets = []
 enemy_damage_texts = []
+
+def fire_bullets_from(enemy, bullets_list):
+    num_bullets = 1
+    spread_gap = 5  # vertical gap between each bullet in pixels
+
+    if hasattr(enemy, "is_final_boss") and enemy.is_final_boss:
+        num_bullets = 3
+        spread_gap = 100
+    elif hasattr(enemy, "is_general") and enemy.is_general:
+        num_bullets = 2
+        spread_gap = 40
+
+    print(f"Firing {num_bullets} bullets from {'Final Boss' if enemy.is_final_boss else 'General' if enemy.is_general else 'Soldier'}")
+    
+    start_offset = -((num_bullets - 1) // 2) * spread_gap
+
+    for i in range(num_bullets):
+        y_offset = start_offset + i * spread_gap
+        bullet = Bullet(enemy.x - 10, enemy.y + y_offset, direction=-1, owner=enemy)
+        bullets_list.append(bullet)
+    
+
 
 
 def main():
@@ -62,10 +77,10 @@ def main():
     while running:
         screen.fill(WHITE)
 
-        character_add_button = AdjustStats.addAttackButton(screen)
-        character_subtract_button = AdjustStats.subtractAttackButton(screen)
-        enemy_add_button = AdjustStats.addHealthButton(screen)
-        enemy_subtract_button = AdjustStats.subtractHealthButton(screen)
+        # character_add_button = AdjustStats.addAttackButton(screen)
+        # character_subtract_button = AdjustStats.subtractAttackButton(screen)
+        # enemy_add_button = AdjustStats.addHealthButton(screen)
+        # enemy_subtract_button = AdjustStats.subtractHealthButton(screen)
         
 
         for event in pygame.event.get():
@@ -74,7 +89,7 @@ def main():
 
             if event.type == pygame.KEYDOWN :
                 if event.key == pygame.K_SPACE and character.alive:
-                    character_bullets.append(Bullet(character.x + 20, character.y + 10))
+                    character_bullets.append(Bullet(character.x + 20, character.y + 10, owner=character))
 
 
 
@@ -82,29 +97,30 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
 
                
-                if character_add_button.collidepoint(event.pos):
-                        character.attack += 1
+                # if character_add_button.collidepoint(event.pos):
+                #         character.attack += 1
 
-                elif character_subtract_button.collidepoint(event.pos):
-                    character.attack -= 1
+                # elif character_subtract_button.collidepoint(event.pos):
+                #     character.attack -= 1
 
-                # Check enemy buttons independently
-                for enemy in current_wave:
-                    if enemy_add_button.collidepoint(event.pos):
-                        enemy.health += 1
-                    if enemy_subtract_button.collidepoint(event.pos):
-                        enemy.health -= 1
+                # # Check enemy buttons independently
+                # for enemy in current_wave:
+                #     if enemy_add_button.collidepoint(event.pos):
+                #         enemy.health += 1
+                #     if enemy_subtract_button.collidepoint(event.pos):
+                #         enemy.health -= 1
                     
-                if not (character_add_button.collidepoint(event.pos) or 
-                          character_subtract_button.collidepoint(event.pos) or 
-                          enemy_add_button.collidepoint(event.pos) or 
-                          enemy_subtract_button.collidepoint(event.pos) ) and  character.alive:
-                    character_bullets.append(Bullet(character.x + 20, character.y + 10, ))
+                # if not (character_add_button.collidepoint(event.pos) or 
+                #           character_subtract_button.collidepoint(event.pos) or 
+                #           enemy_add_button.collidepoint(event.pos) or 
+                #           enemy_subtract_button.collidepoint(event.pos) ) and  character.alive:
+                character_bullets.append(Bullet(character.x + 20, character.y + 10, owner=character))
 
         current_time = pygame.time.get_ticks()
         for enemy in current_wave:
             if enemy.alive and current_time - enemy.last_fire_time >= enemy.fire_delay:
-                enemy_bullets.append(Bullet(enemy.x - 10, enemy.y + 10, direction=-1))
+                fire_bullets_from(enemy, enemy_bullets)
+                print(f"Bullets after firing: {len(enemy_bullets)}")
                 enemy.last_fire_time = current_time
                 enemy.fire_delay = random.randint(500, 1500)
 

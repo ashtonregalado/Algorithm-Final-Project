@@ -2,7 +2,7 @@ import pygame
 import math
 import random
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, attack, health, width=40, height=90, color=(255, 0, 0), boundary_rect=None):
+    def __init__(self, x, y, attack, health, width=40, height=90, color=(255, 0, 0), boundary_rect=None, is_general=False, is_final_boss=False):
         # super().__init__()
         self.x = x
         self.y = y
@@ -15,7 +15,8 @@ class Enemy(pygame.sprite.Sprite):
         self.alive = True
         self.last_fire_time = pygame.time.get_ticks()
         self.fire_delay = random.randint(500, 1500)
-
+        self.is_general = is_general
+        self.is_final_boss = is_final_boss
 
         self.direction = -1
         self.speed = 2
