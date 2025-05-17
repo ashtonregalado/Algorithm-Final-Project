@@ -12,7 +12,10 @@ class Enemy(pygame.sprite.Sprite):
         self.height = height
         self.color = color
         self.font = pygame.font.Font(None, 18)
-        self.alive = True  
+        self.alive = True
+        self.last_fire_time = pygame.time.get_ticks()
+        self.fire_delay = random.randint(500, 1500)
+
 
         self.direction = -1
         self.speed = 2

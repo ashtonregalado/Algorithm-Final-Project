@@ -28,8 +28,18 @@ enemy_boundary = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
 
 
 
-enemy = Enemy(700, 400, 43, 200, boundary_rect=enemy_boundary)
-character = Character(200, 400, 73, 150, boundary_rect=character_boundary)
+soldier_1 = Enemy(700, 200, 50, 200, boundary_rect=enemy_boundary)
+soldier_2 = Enemy(700, 400, 50, 200, boundary_rect=enemy_boundary)
+soldier_3 = Enemy(700, 600, 50, 200, boundary_rect=enemy_boundary)
+
+general_1 = Enemy(700, 200, 100, 500, boundary_rect=enemy_boundary)
+general_2 = Enemy(700, 600, 100, 500, boundary_rect=enemy_boundary)
+
+final_boss = Enemy(700, 400, 500, 1000, boundary_rect=enemy_boundary)
+
+enemies = [[soldier_1, soldier_2, soldier_3], [general_1, general_2], final_boss]
+
+character = Character(200, 400, 100, 1312, boundary_rect=character_boundary)
 
 character_bullets = []
 character_damage_texts = []
@@ -43,6 +53,9 @@ def main():
     target_x, target_y = character.x, character.y
     enemy_fire_delay = random.randint(10, 1000)
     last_enemy_fire_time = pygame.time.get_ticks()
+
+    wave_index = 0
+    current_wave = enemies[wave_index] if isinstance(enemies[wave_index], list) else [enemies[wave_index]]
 
     print(enemy_fire_delay)
 
@@ -67,28 +80,35 @@ def main():
 
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                
+
+               
                 if character_add_button.collidepoint(event.pos):
-                    character.attack += 1
-                if character_subtract_button.collidepoint(event.pos):
+                        character.attack += 1
+
+                elif character_subtract_button.collidepoint(event.pos):
                     character.attack -= 1
-                if enemy_add_button.collidepoint(event.pos):
-                    enemy.health += 1
-                if enemy_subtract_button.collidepoint(event.pos):
-                    enemy.health -= 1
+
+                # Check enemy buttons independently
+                for enemy in current_wave:
+                    if enemy_add_button.collidepoint(event.pos):
+                        enemy.health += 1
+                    if enemy_subtract_button.collidepoint(event.pos):
+                        enemy.health -= 1
                     
-                elif not (character_add_button.collidepoint(event.pos) or 
+                if not (character_add_button.collidepoint(event.pos) or 
                           character_subtract_button.collidepoint(event.pos) or 
                           enemy_add_button.collidepoint(event.pos) or 
                           enemy_subtract_button.collidepoint(event.pos) ) and  character.alive:
                     character_bullets.append(Bullet(character.x + 20, character.y + 10, ))
 
         current_time = pygame.time.get_ticks()
-        if current_time - last_enemy_fire_time >= enemy_fire_delay and enemy.alive:
-            enemy_bullets.append(Bullet(enemy.x - 10, enemy.y + 10, direction = -1))
-            last_enemy_fire_time = current_time
-            enemy_fire_delay = random.randint(10,1000)
-           
+        for enemy in current_wave:
+            if enemy.alive and current_time - enemy.last_fire_time >= enemy.fire_delay:
+                enemy_bullets.append(Bullet(enemy.x - 10, enemy.y + 10, direction=-1))
+                enemy.last_fire_time = current_time
+                enemy.fire_delay = random.randint(500, 1500)
+
+            
             
             
         keys = pygame.key.get_pressed()
@@ -109,15 +129,18 @@ def main():
         for bullet in enemy_bullets:
             bullet.update()
 
-        if enemy.alive:
-            for bullet in character_bullets[:]:
-                if bullet.rect.colliderect(enemy.rect):
-                    character_bullets.remove(bullet)
-                    EnemyDamageGameplay(enemy, character)
-                    if enemy.alive:
-                       character_damage_texts.append(DamageText(enemy.x + 10, enemy.y + -20, Damage.damage(character.attack, enemy.health)))
-            
-            
+        for enemy in current_wave:
+            if enemy.alive:
+                for bullet in character_bullets[:]:
+                    if bullet.rect.colliderect(enemy.rect):
+                        character_bullets.remove(bullet)
+                        EnemyDamageGameplay(enemy, character)
+                        if enemy.alive:
+                            character_damage_texts.append(DamageText(
+                                enemy.x + 10, enemy.y - 20,
+                                Damage.damage(character.attack, enemy.health)
+                            ))
+
             
         if character.alive:
             for bullet in enemy_bullets[:]:
@@ -159,12 +182,28 @@ def main():
             character.move(target_x, target_y, WIDTH, HEIGHT)
             character.draw(screen)
 
-        if enemy.health <= 0:
-            enemy.alive = False
-        
-        if enemy.alive:
-            enemy.move()
-            enemy.draw(screen)
+
+        for enemy in current_wave:
+            if enemy.health <= 0:
+                enemy.alive = False
+        for enemy in current_wave:
+            if enemy.alive:
+                enemy.move()
+                enemy.draw(screen)
+
+        # Check if all enemies in the current wave are dead
+        if all(not e.alive for e in current_wave):
+            wave_index += 1
+            if wave_index < len(enemies):
+                next_wave = enemies[wave_index]
+                current_wave = next_wave if isinstance(next_wave, list) else [next_wave]
+                # Optional: reset bullets and damage text for clarity
+                enemy_bullets.clear()
+                enemy_damage_texts.clear()
+            else:
+                print("YOU WIN!")
+                running = False
+
         
         pygame.display.flip()
         clock.tick(60)
