@@ -41,92 +41,62 @@ enemy_bullets = []
 enemy_damage_texts = []
 
 def fire_bullets_from(enemy, bullets_list):
-    num_bullets = 1
-    spread_gap = 5  # vertical gap between each bullet in pixels
+    # Start the enemy's attack animation
+    if enemy.attack_animation_complete:  # Only fire if not already attacking
+        enemy.start_attack_animation()
+        
+        num_bullets = 1
+        spread_gap = 5  # vertical gap between each bullet in pixels
 
-    if hasattr(enemy, "is_final_boss") and enemy.is_final_boss:
-        num_bullets = 3
-        spread_gap = 100
-    elif hasattr(enemy, "is_general") and enemy.is_general:
-        num_bullets = 2
-        spread_gap = 40
+        if hasattr(enemy, "is_final_boss") and enemy.is_final_boss:
+            num_bullets = 3
+            spread_gap = 100
+        elif hasattr(enemy, "is_general") and enemy.is_general:
+            num_bullets = 2
+            spread_gap = 40
+        
+        start_offset = -((num_bullets - 1) // 2) * spread_gap
 
-    print(f"Firing {num_bullets} bullets from {'Final Boss' if enemy.is_final_boss else 'General' if enemy.is_general else 'Soldier'}")
-    
-    start_offset = -((num_bullets - 1) // 2) * spread_gap
-
-    for i in range(num_bullets):
-        y_offset = start_offset + i * spread_gap
-        bullet = Bullet(enemy.x - 10, enemy.y + y_offset, direction=-1, owner=enemy)
-        bullets_list.append(bullet)
-    
-
+        for i in range(num_bullets):
+            y_offset = start_offset + i * spread_gap
+            bullet = Bullet(enemy.x - 10, enemy.y + y_offset, direction=-1, owner=enemy)
+            bullets_list.append(bullet)
 
 
 def main():
     running = True
     clock = pygame.time.Clock()
     target_x, target_y = character.x, character.y
-    enemy_fire_delay = random.randint(10, 1000)
-    last_enemy_fire_time = pygame.time.get_ticks()
 
     wave_index = 0
     current_wave = enemies[wave_index] if isinstance(enemies[wave_index], list) else [enemies[wave_index]]
 
-    print(enemy_fire_delay)
-
     while running:
         screen.fill(WHITE)
-
-        # character_add_button = AdjustStats.addAttackButton(screen)
-        # character_subtract_button = AdjustStats.subtractAttackButton(screen)
-        # enemy_add_button = AdjustStats.addHealthButton(screen)
-        # enemy_subtract_button = AdjustStats.subtractHealthButton(screen)
-        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
             if event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_SPACE and character.alive:
-                    character_bullets.append(Bullet(character.x + 20, character.y + 10, owner=character))
-
-
+                    if event.key == pygame.K_SPACE and character.alive:
+                        if character.attack_animation_complete:
+                            character.start_attack_animation()
+                            character_bullets.append(Bullet(character.x + 20, character.y + 10, owner=character))
 
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-
-               
-                # if character_add_button.collidepoint(event.pos):
-                #         character.attack += 1
-
-                # elif character_subtract_button.collidepoint(event.pos):
-                #     character.attack -= 1
-
-                # # Check enemy buttons independently
-                # for enemy in current_wave:
-                #     if enemy_add_button.collidepoint(event.pos):
-                #         enemy.health += 1
-                #     if enemy_subtract_button.collidepoint(event.pos):
-                #         enemy.health -= 1
-                    
-                # if not (character_add_button.collidepoint(event.pos) or 
-                #           character_subtract_button.collidepoint(event.pos) or 
-                #           enemy_add_button.collidepoint(event.pos) or 
-                #           enemy_subtract_button.collidepoint(event.pos) ) and  character.alive:
-                character_bullets.append(Bullet(character.x + 20, character.y + 10, owner=character))
+                if character.attack_animation_complete:
+                    character.start_attack_animation()
+                    character_bullets.append(Bullet(character.x + 20, character.y + 10, owner=character))
 
         current_time = pygame.time.get_ticks()
         for enemy in current_wave:
             if enemy.alive and current_time - enemy.last_fire_time >= enemy.fire_delay:
                 fire_bullets_from(enemy, enemy_bullets)
-                print(f"Bullets after firing: {len(enemy_bullets)}")
                 enemy.last_fire_time = current_time
                 enemy.fire_delay = random.randint(500, 1500)
 
-            
-            
             
         keys = pygame.key.get_pressed()
 
@@ -197,6 +167,7 @@ def main():
         
         if character.alive:
             character.move(target_x, target_y, WIDTH, HEIGHT)
+            character.update()
             character.draw(screen)
 
 
