@@ -16,7 +16,15 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Euclid's Algorithm")
 
 WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
+
+soldier_background = pygame.image.load("assets\enemy-background\Space Background.png").convert()
+general_background = pygame.image.load("assets\enemy-background\Vhv4XI.png").convert()
+final_boss_background = pygame.image.load("assets\enemy-background\G7zxxR.png").convert()
+
+
+soldier_background = pygame.transform.scale(soldier_background, (WIDTH, HEIGHT))
+general_background = pygame.transform.scale(general_background, (WIDTH, HEIGHT))
+final_boss_background = pygame.transform.scale(final_boss_background, (WIDTH, HEIGHT))
 
 character_boundary = pygame.Rect(0, 0, WIDTH // 2, HEIGHT)
 enemy_boundary = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
@@ -28,7 +36,7 @@ soldier_3 = Enemy(700, 600, 50, 200, boundary_rect=enemy_boundary)
 general_1 = Enemy(700, 200, 100, 500, boundary_rect=enemy_boundary, is_general = True)
 general_2 = Enemy(700, 600, 100, 500, boundary_rect=enemy_boundary, is_general = True)
 
-final_boss = Enemy(700, 400, 500, 1000, boundary_rect=enemy_boundary, is_final_boss=True)
+final_boss = Enemy(700, 400, 200, 1000, boundary_rect=enemy_boundary, is_final_boss=True)
 
 enemies = [[soldier_1, soldier_2, soldier_3], [general_1, general_2], final_boss]
 
@@ -71,7 +79,12 @@ def main():
     current_wave = enemies[wave_index] if isinstance(enemies[wave_index], list) else [enemies[wave_index]]
 
     while running:
-        screen.fill(WHITE)
+        if wave_index == 0:
+            screen.blit(soldier_background, (0, 0))
+        elif wave_index == 1:
+            screen.blit(general_background, (0, 0))
+        else:
+            screen.blit(final_boss_background, (0, 0))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
