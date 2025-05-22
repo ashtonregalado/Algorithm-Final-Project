@@ -7,11 +7,10 @@ from gameplay import  EnemyDamageGameplay, CharacterDamageGameplay
 from bullet import Bullet
 from damage_text import DamageText
 from gcd import gcd
-from adjust_stats import AdjustStats
 
 pygame.init()
 
-WIDTH,HEIGHT = 800, 600
+WIDTH,HEIGHT = 850, 650
 grid_size = 30
 screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Euclid's Algorithm")
@@ -128,7 +127,6 @@ def main():
                                 Damage.damage(character.attack, enemy.health)
                             ))
 
-            
         if character.alive:
             for bullet in enemy_bullets[:]:
                 if bullet.rect.colliderect(character.rect):
@@ -177,6 +175,7 @@ def main():
         for enemy in current_wave:
             if enemy.alive:
                 enemy.move()
+                enemy.update()
                 enemy.draw(screen)
 
         # Check if all enemies in the current wave are dead
@@ -187,7 +186,6 @@ def main():
             character.health += wave_gcd_health_bonus
 
 
-            
             wave_index += 1
             if wave_index < len(enemies):
                 next_wave = enemies[wave_index]
