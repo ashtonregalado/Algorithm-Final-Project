@@ -126,7 +126,7 @@ class Character(pygame.sprite.Sprite):
     def attack_power(self):
         return self.attack
     
-    #still has an error where the movement is not responsive when cahracter is at the edge
+    #still has an error when the character touches the edge of the screen, the running animation then plays even if you are in idle
     def move(self, target_x, target_y, screen_width, screen_height):
         if not self.alive:
             return
@@ -135,13 +135,11 @@ class Character(pygame.sprite.Sprite):
         dy = target_y - self.y
 
         if dx == 0 and dy == 0:
-            if not self.is_attacking:  # Only change to idle if not attacking
-                self.animation_state = "idle"
-            return  # No need to move
-        else:
-            if not self.is_attacking:  # Only change to running if not attacking
-                self.animation_state = "running"
 
+            if not self.is_attacking:
+                self.animation_state = "idle"
+
+            return
 
         gcd_value = gcd(abs(dx), abs(dy))
         step_x = dx // gcd_value if gcd_value != 0 else 0
@@ -150,21 +148,39 @@ class Character(pygame.sprite.Sprite):
         next_x = self.x + step_x * self.speed
         next_y = self.y + step_y * self.speed
 
-        # Priority 1: respect custom boundary if it exists
+
+
+        # moved = False  # Track whether the character actually moved
+
+        prev_x, prev_y = self.x, self.y
+
         if self.boundary_rect:
             if self.boundary_rect.left <= next_x <= self.boundary_rect.right - self.width:
                 self.x = next_x
+
             if self.boundary_rect.top <= next_y <= self.boundary_rect.bottom - self.height:
                 self.y = next_y
+
         else:
-            # fallback: screen boundaries
             if 0 <= next_x <= screen_width - self.width:
                 self.x = next_x
+
             if 0 <= next_y <= screen_height - self.height:
                 self.y = next_y
 
+
+        moved = (self.x != prev_x) or (self.y != prev_y)
+
+        if not self.is_attacking:
+            if moved:
+                self.animation_state = "running"
+            else:
+                self.animation_state = "idle"
+
+
         self.rect.topleft = (self.x, self.y)
         self.update_animation()
+
 
     def take_damage(self, damage: int):
         """Reduces health and marks enemy as destroyed if needed."""
