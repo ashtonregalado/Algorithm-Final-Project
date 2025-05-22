@@ -25,11 +25,11 @@ class Enemy(pygame.sprite.Sprite):
         
         # Adjust speed based on enemy type
         if is_final_boss:
-            self.speed = 1  # Boss moves slower
+            self.speed = 1.5  # Boss moves slower
         elif is_general:
-            self.speed = 1.5  # Generals have medium speed
+            self.speed = 2  # Generals have medium speed
         else:
-            self.speed = 2  # Regular soldiers are fastest
+            self.speed = 2.5  # Regular soldiers are fastest
 
         # Set up random movement direction
         while True:
@@ -222,7 +222,7 @@ class Enemy(pygame.sprite.Sprite):
             
     def update(self):
         """Update method required for sprite groups"""
-        self.move()
+        self.update_animation()
 
     def draw(self, screen):
         """Draws the enemy, displaying attack above and health in the middle."""
