@@ -7,6 +7,8 @@ from gameplay import  EnemyDamageGameplay, CharacterDamageGameplay
 from bullet import Bullet
 from damage_text import DamageText
 from gcd import gcd
+from game_over import gameOver
+from start_menu import start_menu
 
 pygame.init()
 
@@ -17,9 +19,9 @@ pygame.display.set_caption("Euclid's Algorithm")
 
 WHITE = (255, 255, 255)
 
-soldier_background = pygame.image.load("assets\enemy-background\Space Background.png").convert()
-general_background = pygame.image.load("assets\enemy-background\Vhv4XI.png").convert()
-final_boss_background = pygame.image.load("assets\enemy-background\G7zxxR.png").convert()
+soldier_background = pygame.image.load("assets/enemy-background/Space Background.png").convert()
+general_background = pygame.image.load("assets/enemy-background/Vhv4XI.png").convert()
+final_boss_background = pygame.image.load("assets/enemy-background/G7zxxR.png").convert()
 
 
 soldier_background = pygame.transform.scale(soldier_background, (WIDTH, HEIGHT))
@@ -29,25 +31,11 @@ final_boss_background = pygame.transform.scale(final_boss_background, (WIDTH, HE
 character_boundary = pygame.Rect(0, 0, WIDTH // 2, HEIGHT)
 enemy_boundary = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
 
-soldier_1 = Enemy(700, 200, 50, 200, boundary_rect=enemy_boundary)
-soldier_2 = Enemy(700, 400, 50, 200, boundary_rect=enemy_boundary)
-soldier_3 = Enemy(700, 600, 50, 200, boundary_rect=enemy_boundary)
 
-general_1 = Enemy(700, 200, 100, 500, boundary_rect=enemy_boundary, is_general = True)
-general_2 = Enemy(700, 600, 100, 500, boundary_rect=enemy_boundary, is_general = True)
-
-final_boss = Enemy(700, 400, 200, 1000, boundary_rect=enemy_boundary, is_final_boss=True)
-
-enemies = [[soldier_1, soldier_2, soldier_3], [general_1, general_2], final_boss]
-
-character = Character(200, 400, 100, 1312, boundary_rect=character_boundary, is_character=True)
-
-character_bullets = []
-character_damage_texts = []
-enemy_bullets = []
-enemy_damage_texts = []
+backgrounds = [soldier_background, general_background, final_boss_background]
 
 def fire_bullets_from(enemy, bullets_list):
+    
     # Start the enemy's attack animation
     if enemy.attack_animation_complete:  # Only fire if not already attacking
         enemy.start_attack_animation()
@@ -57,7 +45,7 @@ def fire_bullets_from(enemy, bullets_list):
 
         if hasattr(enemy, "is_final_boss") and enemy.is_final_boss:
             num_bullets = 3
-            spread_gap = 100
+            spread_gap = 150
         elif hasattr(enemy, "is_general") and enemy.is_general:
             num_bullets = 2
             spread_gap = 40
@@ -70,7 +58,27 @@ def fire_bullets_from(enemy, bullets_list):
             bullets_list.append(bullet)
 
 
+
 def main():
+
+    soldier_1 = Enemy(700, 200, 50, 200, 200, boundary_rect=enemy_boundary)
+    soldier_2 = Enemy(700, 400, 50, 200, 200, boundary_rect=enemy_boundary)
+    soldier_3 = Enemy(700, 600, 50, 200,200, boundary_rect=enemy_boundary)
+
+    general_1 = Enemy(700, 200, 100, 500, 500,boundary_rect=enemy_boundary, is_general = True)
+    general_2 = Enemy(700, 600, 100, 500,500, boundary_rect=enemy_boundary, is_general = True)
+
+    final_boss = Enemy(700, 400, 100, 1000,1000, boundary_rect=enemy_boundary, is_final_boss=True)
+
+    enemies = [[soldier_1, soldier_2, soldier_3], [general_1, general_2], final_boss]
+
+    character = Character(200, 400, 100, 1312, 1312,boundary_rect=character_boundary, is_character=True)
+
+    character_bullets = []
+    character_damage_texts = []
+    enemy_bullets = []
+    enemy_damage_texts = []
+
     running = True
     clock = pygame.time.Clock()
     target_x, target_y = character.x, character.y
@@ -144,7 +152,7 @@ def main():
             for bullet in enemy_bullets[:]:
                 if bullet.rect.colliderect(character.rect):
                     enemy_bullets.remove(bullet)
-                    CharacterDamageGameplay( character, enemy)
+                    CharacterDamageGameplay( character, bullet.owner)
                     if character.alive:
                         enemy_damage_texts.append(DamageText(character.x + 10, character.y + -20, Damage.damage(enemy.attack, character.health)))
             
@@ -197,6 +205,7 @@ def main():
             wave_gcd_health_bonus = sum(gcd(character.health, e.max_health)for e in current_wave)
             character.attack += wave_gcd_attack_bonus
             character.health += wave_gcd_health_bonus
+            character.max_health += wave_gcd_health_bonus
 
 
             wave_index += 1
@@ -208,12 +217,25 @@ def main():
                 enemy_damage_texts.clear()
             else:
                 print("YOU WIN!")
+                gameOver(screen, WIDTH, HEIGHT, "character")
+                
                 running = False
+                return
 
-        
+        if not character.alive:
+            gameOver(screen, WIDTH, HEIGHT, "enemy")
+            return
+
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
 
-main()
+def run_game():
+    while True:
+        start_menu(screen, backgrounds, WIDTH, HEIGHT)
+        main()
+
+if __name__ == "__main__":
+    pygame.init()
+    run_game()
