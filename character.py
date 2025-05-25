@@ -4,7 +4,7 @@ from gcd import gcd
 
 
 class Character(pygame.sprite.Sprite):
-    def __init__(self, x, y, attack,health, speed = 3, width = 70, height= 110, color= (0, 0, 255), boundary_rect=None, is_character = False):
+    def __init__(self, x, y, attack, health, max_health, speed = 3, width = 70, height= 110, color= (0, 0, 255), boundary_rect=None, is_character = False):
         super().__init__()
         self.x = x
         self.y = y
@@ -18,6 +18,7 @@ class Character(pygame.sprite.Sprite):
         self.is_character = is_character
         self.font = pygame.font.Font(None, 18)
         self.alive = True 
+        self.max_health = max_health
 
          # Animation properties
         self.animation_state = "idle"  # Current animation state ("idle" or "attacking")
@@ -30,6 +31,12 @@ class Character(pygame.sprite.Sprite):
         self.is_attacking = False      # Flag to track attacking state
         self.attack_animation_complete = True  # Flag to track if attack animation complet
         # Load animation frames
+
+        self.health_icon = pygame.image.load("assets/toppng.com-ixel-heart-icon-pixel-heart-icon-545x474.png").convert_alpha()
+        self.attack_icon = pygame.image.load("assets/pngegg.png").convert_alpha()
+
+        self.attack_icon = pygame.transform.scale(self.attack_icon, (24, 25))
+        self.health_icon = pygame.transform.scale(self.health_icon, (20, 17))
 
         try:
             base_folder = "assets\\Reaper_Man_1\\PNG\\PNG Sequences"
@@ -197,13 +204,33 @@ class Character(pygame.sprite.Sprite):
         if self.alive:
             screen.blit(self.image, self.rect.topleft)
 
-            attack_surface = self.font.render(f"ATK: {self.attack}", True, (0, 0, 0))
-            attack_rect = attack_surface.get_rect(midbottom=(self.rect.centerx, self.rect.top - 5))
-            screen.blit(attack_surface, attack_rect)
+            padding = 5
 
-            health_surface = self.font.render(f"{self.health}", True, (255, 255, 255))
-            health_rect = health_surface.get_rect(center=self.rect.center)
+            # ---- Health (topmost) ----
+            health_surface = self.font.render(f"{self.health}/{self.max_health}", True, (255, 255, 255))
+            health_icon_rect = self.health_icon.get_rect()
+            health_rect = health_surface.get_rect()
+
+            # Position icon first (above sprite)
+            health_icon_rect.topleft = (self.rect.left + padding, self.rect.top - 40)
+            # Align text to right of icon
+            health_rect.midleft = (health_icon_rect.right + 8, health_icon_rect.centery)
+
+            screen.blit(self.health_icon, health_icon_rect)
             screen.blit(health_surface, health_rect)
+
+            # ---- Attack (just below health) ----
+            attack_surface = self.font.render(f"{self.attack}", True, (255, 255, 255))
+            attack_icon_rect = self.attack_icon.get_rect()
+            attack_rect = attack_surface.get_rect()
+
+            # Position icon just below health icon
+            attack_icon_rect.topleft = (self.rect.left + padding, health_icon_rect.bottom + 5)
+            # Align text to right of icon
+            attack_rect.midleft = (attack_icon_rect.right + 5, attack_icon_rect.centery)
+
+            screen.blit(self.attack_icon, attack_icon_rect)
+            screen.blit(attack_surface, attack_rect)
 
         return self.alive
 

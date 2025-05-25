@@ -4,13 +4,13 @@ import random
 import os
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, attack, health, width=80, height=120, color=(255, 0, 0), boundary_rect=None, is_general=False, is_final_boss=False):
+    def __init__(self, x, y, attack, health, max_health, width=80, height=120, color=(255, 0, 0), boundary_rect=None, is_general=False, is_final_boss=False):
         super().__init__()
         self.x = x
         self.y = y
         self.attack = attack
         self.health = health
-        self.max_health = health
+        self.max_health = max_health
         self.width = width
         self.height = height
         self.color = color
@@ -22,6 +22,13 @@ class Enemy(pygame.sprite.Sprite):
         self.is_final_boss = is_final_boss
 
         self.direction = -1
+
+        self.health_icon = pygame.image.load("assets/toppng.com-ixel-heart-icon-pixel-heart-icon-545x474.png").convert_alpha()
+        self.attack_icon = pygame.image.load("assets/pngegg.png").convert_alpha()
+
+        self.attack_icon = pygame.transform.scale(self.attack_icon, (24, 25))
+        self.health_icon = pygame.transform.scale(self.health_icon, (20, 17))
+
         
         # Adjust speed based on enemy type
         if is_final_boss:
@@ -228,30 +235,32 @@ class Enemy(pygame.sprite.Sprite):
         """Draws the enemy, displaying attack above and health in the middle."""
         if self.alive:
             screen.blit(self.image, self.rect.topleft)
+            padding = 5
 
-            attack_surface = self.font.render(f"ATK: {self.attack}", True, (0, 0, 0))
-            attack_rect = attack_surface.get_rect(midbottom=(self.rect.centerx, self.rect.top - 5))
-            screen.blit(attack_surface, attack_rect)
+            # ---- Health (topmost) ----
+            health_surface = self.font.render(f"{self.health}/{self.max_health}", True, (255, 255, 255))
+            health_icon_rect = self.health_icon.get_rect()
+            health_rect = health_surface.get_rect()
 
-            # Draw visual health bar
-            health_bar_width = self.width
-            health_bar_height = 6
-            health_bar_x = self.rect.x
-            health_bar_y = self.rect.y - 10
-            
-            # Background (red)
-            pygame.draw.rect(screen, (255, 0, 0), 
-                             (health_bar_x, health_bar_y, health_bar_width, health_bar_height))
-            
-            # Foreground (green) - sized according to current health
-            health_percent = max(0, self.health / self.max_health)
-            current_health_width = health_bar_width * health_percent
-            pygame.draw.rect(screen, (0, 255, 0), 
-                             (health_bar_x, health_bar_y, current_health_width, health_bar_height))
+            # Position icon first (above sprite)
+            health_icon_rect.topleft = (self.rect.left + padding, self.rect.top - 40)
+            # Align text to right of icon
+            health_rect.midleft = (health_icon_rect.right + 8, health_icon_rect.centery)
 
-            # Also show health number
-            health_surface = self.font.render(f"{self.health}", True, (255, 255, 255))
-            health_rect = health_surface.get_rect(center=self.rect.center)
+            screen.blit(self.health_icon, health_icon_rect)
             screen.blit(health_surface, health_rect)
+
+            # ---- Attack (just below health) ----
+            attack_surface = self.font.render(f"{self.attack}", True, (255, 255, 255))
+            attack_icon_rect = self.attack_icon.get_rect()
+            attack_rect = attack_surface.get_rect()
+
+            # Position icon just below health icon
+            attack_icon_rect.topleft = (self.rect.left + padding, health_icon_rect.bottom + 5)
+            # Align text to right of icon
+            attack_rect.midleft = (attack_icon_rect.right + 5, attack_icon_rect.centery)
+
+            screen.blit(self.attack_icon, attack_icon_rect)
+            screen.blit(attack_surface, attack_rect)
 
         return self.alive
