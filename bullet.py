@@ -33,7 +33,7 @@ class Bullet(pygame.sprite.Sprite):
             elif hasattr(self.owner, "is_character"):
                 # self.color = (100, 100, 100)
                 bullet_sprite = "assets\Reaper_Man_1\PNG\Vector Parts\SlashFX.png"
-                self.speed = 5
+                self.speed = 10
                 width = 15
                 height = 15
         self.image = pygame.image.load(bullet_sprite).convert_alpha()
