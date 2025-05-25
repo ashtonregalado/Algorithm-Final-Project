@@ -35,42 +35,63 @@ enemy_boundary = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
 backgrounds = [soldier_background, general_background, final_boss_background]
 
 def fire_bullets_from(enemy, bullets_list):
-    
-    # Start the enemy's attack animation
-    if enemy.attack_animation_complete:  # Only fire if not already attacking
+    if enemy.attack_animation_complete:
         enemy.start_attack_animation()
-        
+
         num_bullets = 1
-        spread_gap = 5  # vertical gap between each bullet in pixels
+        spread_gap = 5
 
         if hasattr(enemy, "is_final_boss") and enemy.is_final_boss:
-            num_bullets = 3
-            spread_gap = 150
+            num_bullets = 5
+            spread_gap = 10
         elif hasattr(enemy, "is_general") and enemy.is_general:
             num_bullets = 2
             spread_gap = 40
-        
+
         start_offset = -((num_bullets - 1) // 2) * spread_gap
 
         for i in range(num_bullets):
             y_offset = start_offset + i * spread_gap
-            bullet = Bullet(enemy.x - 10, enemy.y + y_offset, direction=-1, owner=enemy)
+            x = enemy.x - 10
+            y = enemy.y + y_offset
+
+            # Set direction for each bullet
+            if hasattr(enemy, "is_final_boss") and enemy.is_final_boss:
+                # Top bullet
+                if i == 0:
+                    bullet = Bullet(x, y, dx=-4, dy=-4, owner=enemy)  # up-left
+                # Middle bullet
+                elif i == 1:
+                    bullet = Bullet(x, y, dx=-4, dy=-2, owner=enemy)
+                elif i == 2:
+                    bullet = Bullet(x, y, dx=-4, dy=0, owner=enemy)  # straight left
+                # Bottom bullet
+                elif i == 3:
+                    bullet = Bullet(x, y, dx=-4, dy=2, owner=enemy)  # down-left
+                else:
+                    bullet = Bullet(x, y, dx=-4, dy=4, owner=enemy)
+            else:
+                bullet = Bullet(x, y, dx=-5, dy=0, owner=enemy)  # straight bullets for others
+
             bullets_list.append(bullet)
 
 
 
 def main():
 
-    soldier_1 = Enemy(700, 200, 50, 200, 200, boundary_rect=enemy_boundary)
-    soldier_2 = Enemy(700, 400, 50, 200, 200, boundary_rect=enemy_boundary)
-    soldier_3 = Enemy(700, 600, 50, 200,200, boundary_rect=enemy_boundary)
+    soldier_1 = Enemy(700, 100, 50, 200, 200, boundary_rect=enemy_boundary)
+    soldier_2 = Enemy(700, 200, 50, 200, 200, boundary_rect=enemy_boundary)
+    soldier_3 = Enemy(700, 300, 50, 200,200, boundary_rect=enemy_boundary)
+    soldier_4 = Enemy(700, 400, 50, 200,200, boundary_rect=enemy_boundary)
+    soldier_5 = Enemy(700, 500, 50, 200,200, boundary_rect=enemy_boundary)
 
     general_1 = Enemy(700, 200, 100, 500, 500,boundary_rect=enemy_boundary, is_general = True)
-    general_2 = Enemy(700, 600, 100, 500,500, boundary_rect=enemy_boundary, is_general = True)
+    general_2 = Enemy(700, 400, 100, 500,500, boundary_rect=enemy_boundary, is_general = True)
+    general_3 = Enemy(700, 600, 100, 500,500, boundary_rect=enemy_boundary, is_general = True)
 
     final_boss = Enemy(700, 400, 100, 1000,1000, boundary_rect=enemy_boundary, is_final_boss=True)
 
-    enemies = [[soldier_1, soldier_2, soldier_3], [general_1, general_2], final_boss]
+    enemies = [[soldier_1, soldier_2, soldier_3, soldier_4, soldier_5], [general_1, general_2, general_3], final_boss]
 
     character = Character(200, 400, 100, 1312, 1312,boundary_rect=character_boundary, is_character=True)
 
@@ -102,13 +123,13 @@ def main():
                     if event.key == pygame.K_SPACE and character.alive:
                         if character.attack_animation_complete:
                             character.start_attack_animation()
-                            character_bullets.append(Bullet(character.x + 20, character.y + 10, owner=character))
+                            character_bullets.append(Bullet(character.x + 20, character.y + 10,0,0, owner=character))
 
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if character.attack_animation_complete:
                     character.start_attack_animation()
-                    character_bullets.append(Bullet(character.x + 20, character.y + 10, owner=character))
+                    character_bullets.append(Bullet(character.x + 20, character.y + 10,0,0, owner=character))
 
         current_time = pygame.time.get_ticks()
         for enemy in current_wave:

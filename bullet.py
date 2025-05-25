@@ -1,10 +1,12 @@
 import pygame
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction=1, speed=5, color=(0, 0, 0), owner=None):
+    def __init__(self, x, y, dx, dy, direction=1, speed=5, color=(0, 0, 0), owner=None):
         super().__init__()
         self.x = x
         self.y = y
+        self.dx = dx
+        self.dy = dy
         self.direction = direction
         self.speed = speed
         self.color = color
@@ -40,11 +42,29 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (25, 25))  # Adjust size if needed
         self.rect = pygame.Rect(x, y, width, height)
 
+    # def update(self):
+    #     self.rect.x += self.speed * self.direction
+    #     self.x = self.rect.x  # keep x in sync
+    #     if self.rect.right < 0 or self.rect.left > 800:
+    #         self.active = False
+
     def update(self):
-        self.rect.x += self.speed * self.direction
-        self.x = self.rect.x  # keep x in sync
-        if self.rect.right < 0 or self.rect.left > 800:
+        if self.dx != 0 or self.dy != 0:
+            # Use directional dx/dy movement (for boss bullets)
+            self.x += self.dx
+            self.y += self.dy
+            self.rect.x = int(self.x)
+            self.rect.y = int(self.y)
+        else:
+            # Use horizontal straight movement (for character/general)
+            self.rect.x += self.speed * self.direction
+            self.x = self.rect.x  # keep x in sync
+
+        # Deactivate if off-screen
+        if self.rect.right < 0 or self.rect.left > 800 or self.rect.bottom < 0 or self.rect.top > 600:
             self.active = False
+
+
         
 
     def draw(self, screen):
