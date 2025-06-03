@@ -82,7 +82,7 @@ class Character(pygame.sprite.Sprite):
     
     def startAttackAnimation(self):
         """Start the attack animation sequence"""
-        # Always allow starting a new attack animation
+
         self.is_attacking = True
         self.animation_state = "attacking"
         self.current_frame = 0
@@ -125,68 +125,145 @@ class Character(pygame.sprite.Sprite):
             if self.current_frame < len(current_frames):
                 self.image = current_frames[self.current_frame]
 
-
-
-    def fullHealth(self):
-        return self.health
-
-    def attackPower(self):
-        return self.attack
+        
     
-    #still has an error when the character touches the edge of the screen, the running animation then plays even if you are in idle
+    # def move(self, target_x, target_y, screen_width, screen_height):
+    #     if not self.alive:
+    #         return
+
+    #     dx = target_x - self.x
+    #     dy = target_y - self.y
+
+    #     if dx == 0 and dy == 0:
+    #         if not self.is_attacking:
+    #             self.animation_state = "idle"
+    #         return
+
+    #     # GCD calculation
+    #     gcd_value = gcd(abs(dx), abs(dy))
+    #     step_x = dx // gcd_value if gcd_value != 0 else 0
+    #     step_y = dy // gcd_value if gcd_value != 0 else 0
+
+    #     next_x = self.x + step_x * self.speed
+    #     next_y = self.y + step_y * self.speed
+
+    #     # Store previous position to check if movement actually happened
+    #     prev_x, prev_y = self.x, self.y
+
+    #     # Boundary checking
+    #     if self.boundary_rect:
+    #         # Check X boundary
+    #         if self.boundary_rect.left <= next_x <= self.boundary_rect.right - self.width:
+    #             self.x = next_x
+
+    #         # Check Y boundary  
+    #         if self.boundary_rect.top <= next_y <= self.boundary_rect.bottom - self.height:
+    #             self.y = next_y
+
+    #     else:
+    #         # Check X boundary
+    #         if 0 <= next_x <= screen_width - self.width:
+    #             self.x = next_x
+
+    #         # Check Y boundary
+    #         if 0 <= next_y <= screen_height - self.height:
+    #             self.y = next_y
+
+    #     # Check if character actually moved
+    #     moved = (self.x != prev_x) or (self.y != prev_y)
+
+    #     # ONLY PRINT WHEN CHARACTER ACTUALLY MOVES
+    #     if moved:
+    #         print(f"\n=== CHARACTER MOVED ===")
+    #         print(f"From: ({prev_x}, {prev_y}) -> To: ({self.x}, {self.y})")
+    #         print(f"Target: ({target_x}, {target_y})")
+    #         print(f"Distance vector: dx={dx}, dy={dy}")
+    #         print(f"GCD({abs(dx)}, {abs(dy)}) = {gcd_value}")
+    #         print(f"Step vector: ({step_x}, {step_y}) * speed({self.speed}) = ({step_x * self.speed}, {step_y * self.speed})")
+            
+    #         # Calculate remaining distance to target
+    #         remaining_dx = target_x - self.x
+    #         remaining_dy = target_y - self.y
+    #         remaining_distance = (remaining_dx**2 + remaining_dy**2)**0.5
+    #         print(f"Remaining distance: {remaining_distance:.2f}")
+            
+    #         if remaining_distance < 1:
+    #             print("🎯 Very close to target!")
+    #         print("=" * 25)
+
+    #     # Animation state management
+    #     if not self.is_attacking:
+    #         if moved:
+    #             self.animation_state = "running"
+    #         else:
+    #             self.animation_state = "idle"
+
+    #     self.rect.topleft = (self.x, self.y)
+    #     self.updateAnimation()
+
     def move(self, target_x, target_y, screen_width, screen_height):
+        # Don't move if the character is dead
         if not self.alive:
             return
 
+        # Calculate distance to the target
         dx = target_x - self.x
         dy = target_y - self.y
+        # Example: self.x = 100, self.y = 100, target_x = 160, target_y = 130
+        # dx = 60, dy = 30
 
+        # If already at the target, do nothing
         if dx == 0 and dy == 0:
-
             if not self.is_attacking:
                 self.animation_state = "idle"
-
             return
 
+        # Find the greatest common divisor (GCD) to simplify the direction
+        # Example: gcd(60, 30) = 30
         gcd_value = gcd(abs(dx), abs(dy))
+
+        # Divide dx and dy by GCD to get a unit step in the correct direction
+        # step_x = 60 // 30 = 2, step_y = 30 // 30 = 1
+        # This means the direction is (2, 1) — for every 2 steps right, move 1 step down
         step_x = dx // gcd_value if gcd_value != 0 else 0
         step_y = dy // gcd_value if gcd_value != 0 else 0
 
+        # Multiply unit step by speed to move smoothly
+        # Example: if speed = 5, then:
+        # next_x = 100 + 2 * 5 = 110
+        # next_y = 100 + 1 * 5 = 105
         next_x = self.x + step_x * self.speed
         next_y = self.y + step_y * self.speed
 
-
-
-        # moved = False  # Track whether the character actually moved
-
+        # Store previous position for later comparison
         prev_x, prev_y = self.x, self.y
 
+        # If there's a movement boundary (e.g., room or map limit), use that
         if self.boundary_rect:
+            # Example: boundary = (left=50, right=500, top=50, bottom=400)
             if self.boundary_rect.left <= next_x <= self.boundary_rect.right - self.width:
                 self.x = next_x
-
             if self.boundary_rect.top <= next_y <= self.boundary_rect.bottom - self.height:
                 self.y = next_y
-
         else:
+            # If no boundary given, use screen edges
             if 0 <= next_x <= screen_width - self.width:
                 self.x = next_x
-
             if 0 <= next_y <= screen_height - self.height:
                 self.y = next_y
 
-
+        # Check if movement actually happened
         moved = (self.x != prev_x) or (self.y != prev_y)
 
+        # Update animation depending on movement
         if not self.is_attacking:
             if moved:
                 self.animation_state = "running"
             else:
                 self.animation_state = "idle"
 
-
+        # Update the sprite’s rectangle position on screen
         self.rect.topleft = (self.x, self.y)
-        self.updateAnimation()
 
 
     def takeDamage(self, damage: int):
@@ -206,7 +283,7 @@ class Character(pygame.sprite.Sprite):
 
             padding = 5
 
-            # ---- Health (topmost) ----
+            #Health
             health_surface = self.font.render(f"{self.health}/{self.max_health}", True, (255, 255, 255))
             health_icon_rect = self.health_icon.get_rect()
             health_rect = health_surface.get_rect()
@@ -219,7 +296,7 @@ class Character(pygame.sprite.Sprite):
             screen.blit(self.health_icon, health_icon_rect)
             screen.blit(health_surface, health_rect)
 
-            # ---- Attack (just below health) ----
+            #Attack
             attack_surface = self.font.render(f"{self.attack}", True, (255, 255, 255))
             attack_icon_rect = self.attack_icon.get_rect()
             attack_rect = attack_surface.get_rect()

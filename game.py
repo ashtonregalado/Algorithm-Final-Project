@@ -3,7 +3,7 @@ import random
 from character import Character
 from enemy import Enemy
 from damage import Damage
-from gameplay import  enemyDamageGameplay, characterDamageGameplay
+from damageGameplay import  enemyDamageGameplay, characterDamageGameplay
 from bullet import Bullet
 from damage_text import DamageText
 from gcd import gcd
@@ -38,21 +38,21 @@ backgrounds = [soldier_background, general_background, final_boss_background]
 
 def main():
 
-    soldier_1 = Enemy(700, 100, 50, 200, 200, boundary_rect=enemy_boundary)
-    soldier_2 = Enemy(700, 200, 50, 200, 200, boundary_rect=enemy_boundary)
-    soldier_3 = Enemy(700, 300, 50, 200,200, boundary_rect=enemy_boundary)
-    soldier_4 = Enemy(700, 400, 50, 200,200, boundary_rect=enemy_boundary)
-    soldier_5 = Enemy(700, 500, 50, 200,200, boundary_rect=enemy_boundary)
+    soldier_1 = Enemy(700, 100, 25, 250, 250, boundary_rect=enemy_boundary)
+    soldier_2 = Enemy(700, 200, 25, 250, 250, boundary_rect=enemy_boundary)
+    soldier_3 = Enemy(700, 300, 25, 250,250, boundary_rect=enemy_boundary)
+    soldier_4 = Enemy(700, 400, 25, 250,250, boundary_rect=enemy_boundary)
+    soldier_5 = Enemy(700, 500, 25, 250,250, boundary_rect=enemy_boundary)
 
-    general_1 = Enemy(700, 200, 100, 500, 500,boundary_rect=enemy_boundary, is_general = True)
-    general_2 = Enemy(700, 400, 100, 500,500, boundary_rect=enemy_boundary, is_general = True)
-    general_3 = Enemy(700, 600, 100, 500,500, boundary_rect=enemy_boundary, is_general = True)
+    general_1 = Enemy(700, 200, 50, 500, 500,boundary_rect=enemy_boundary, is_general = True)
+    general_2 = Enemy(700, 400, 50, 500,500, boundary_rect=enemy_boundary, is_general = True)
+    general_3 = Enemy(700, 600, 50, 500,500, boundary_rect=enemy_boundary, is_general = True)
 
-    final_boss = Enemy(700, 400, 100, 1000,1000, boundary_rect=enemy_boundary, is_final_boss=True)
+    final_boss = Enemy(700, 400, 150, 1000,1000, boundary_rect=enemy_boundary, is_final_boss=True)
 
     enemies = [[soldier_1, soldier_2, soldier_3, soldier_4, soldier_5], [general_1, general_2, general_3], final_boss]
 
-    character = Character(200, 400, 100, 1312, 1312,boundary_rect=character_boundary, is_character=True)
+    character = Character(200, 400, 45, 500, 500,boundary_rect=character_boundary, is_character=True)
 
     character_bullets = []
     character_damage_texts = []
@@ -78,11 +78,11 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            if event.type == pygame.KEYDOWN :
-                    if event.key == pygame.K_SPACE and character.alive:
-                        if character.attack_animation_complete:
-                            character.startAttackAnimation()
-                            character_bullets.append(Bullet(character.x + 20, character.y + 10,0,0, owner=character))
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and character.alive:
+                    if character.attack_animation_complete:
+                        character.startAttackAnimation()
+                        character_bullets.append(Bullet(character.x + 20, character.y + 10,0,0, owner=character))
 
 
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -134,7 +134,7 @@ def main():
                     enemy_bullets.remove(bullet)
                     characterDamageGameplay( character, bullet.owner)
                     if character.alive:
-                        enemy_damage_texts.append(DamageText(character.x + 10, character.y + -20, Damage.damage(enemy.attack, character.health)))
+                        enemy_damage_texts.append(DamageText(character.x + 10, character.y + -20, Damage.damage(bullet.owner.attack, character.health)))
             
         character_bullets[:] = [bullet for bullet in character_bullets if bullet.active]
         enemy_bullets[:] = [bullet for bullet in enemy_bullets if bullet.active]

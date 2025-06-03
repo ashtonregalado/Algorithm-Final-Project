@@ -7,7 +7,7 @@ def gameOver(screen, WIDTH, HEIGHT, winner):
     title_text = font_title.render("Game Over", True, (255, 255, 255))
     character_wins_text = font_button.render("You Win", True, (255, 255, 255))
     enemy_wins_text = font_button.render("You Lose", True, (255, 255, 255))
-    retry_text = font_button.render("Press R to Retry or Q to Quit", True, (255, 255, 255))
+    retry_text = font_button.render("Press M to go back to Start Menu", True, (255, 255, 255))
 
     while True:
         for event in pygame.event.get():
@@ -16,12 +16,10 @@ def gameOver(screen, WIDTH, HEIGHT, winner):
                 exit()
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    pygame.quit()
-                    exit()
-                if event.key == pygame.K_r:
-                    return  # Exit gameOver screen to restart game
-
+                if event.key == pygame.K_m:
+ 
+                    return
+                
         screen.fill((0, 0, 0))  # Clear screen with black background
 
         # Draw texts

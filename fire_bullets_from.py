@@ -13,7 +13,7 @@ def fireBulletsFrom(enemy, bullets_list):
         elif hasattr(enemy, "is_general") and enemy.is_general:
             num_bullets = 2
             spread_gap = 40
-
+        # Determines the vertical offset of the topmost bullet
         start_offset = -((num_bullets - 1) // 2) * spread_gap
 
         for i in range(num_bullets):

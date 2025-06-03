@@ -55,7 +55,7 @@ class Enemy(pygame.sprite.Sprite):
         self.current_frame = 0         # Current frame index
         self.animation_timer = 0       # Timer to control frame changes
         self.is_attacking = False      # Flag to track attacking state
-        self.attack_animation_complete = True  # Flag to track if attack animation complet
+        self.attack_animation_complete = True  # Flag to track if attack animation completed
         # Load animation frames
         try:
             # Determine which folder to use based on enemy type
@@ -157,12 +157,6 @@ class Enemy(pygame.sprite.Sprite):
                 self.image = current_frames[self.current_frame]
 
 
-    def fullHealth(self):
-        return self.health
-    
-    def attackPower(self):
-        return self.attack
-    
     @staticmethod
     def randomDirection(speed):
         angle = random.uniform(0, 2 * math.pi)
@@ -213,11 +207,6 @@ class Enemy(pygame.sprite.Sprite):
         
         # Update animation
         self.updateAnimation()
-
-    def fire(self):
-        """Called when the enemy fires a bullet"""
-        self.startAttackAnimation()
-        return True  # Return True to indicate firing action taken
 
 
     def takeDamage(self, damage: int):
