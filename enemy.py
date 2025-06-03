@@ -70,10 +70,10 @@ class Enemy(pygame.sprite.Sprite):
             attack_folder = os.path.join(base_folder, "Attacking")
             
             # Load idle animation frames
-            self.idle_frames = self._load_animation_frames(idle_folder, width, height)
+            self.idle_frames = self.loadAnimationFrames(idle_folder, width, height)
             
             # Load attack animation frames
-            self.attack_frames = self._load_animation_frames(attack_folder, width, height)
+            self.attack_frames = self.loadAnimationFrames(attack_folder, width, height)
             
             # Set initial image
             if self.idle_frames:
@@ -97,7 +97,7 @@ class Enemy(pygame.sprite.Sprite):
         # Create the rectangle for positioning and collisions
         self.rect = self.image.get_rect(topleft=(x, y))
 
-    def _load_animation_frames(self, folder_path, width, height):
+    def loadAnimationFrames(self, folder_path, width, height):
         """Helper method to load animation frames from a folder"""
         frames = []
         try:
@@ -116,7 +116,7 @@ class Enemy(pygame.sprite.Sprite):
             
         return frames
 
-    def start_attack_animation(self):
+    def startAttackAnimation(self):
         """Start the attack animation sequence"""
         if not self.is_attacking and self.attack_animation_complete:
             self.is_attacking = True
@@ -125,7 +125,7 @@ class Enemy(pygame.sprite.Sprite):
             self.animation_timer = 0
             self.attack_animation_complete = False
 
-    def update_animation(self):
+    def updateAnimation(self):
         """Update the current animation frame based on state"""
         # Get the current animation frames based on state
         current_frames = self.attack_frames if self.animation_state == "attacking" else self.idle_frames
@@ -157,14 +157,14 @@ class Enemy(pygame.sprite.Sprite):
                 self.image = current_frames[self.current_frame]
 
 
-    def full_health(self):
+    def fullHealth(self):
         return self.health
     
-    def attack_power(self):
+    def attackPower(self):
         return self.attack
     
     @staticmethod
-    def random_direction(speed):
+    def randomDirection(speed):
         angle = random.uniform(0, 2 * math.pi)
         return math.cos(angle) * speed, math.sin(angle) * speed
 
@@ -207,20 +207,20 @@ class Enemy(pygame.sprite.Sprite):
                 bounced = True
 
             if bounced:
-                self.dx, self.dy = self.random_direction(self.speed)
+                self.dx, self.dy = self.randomDirection(self.speed)
 
         self.rect.topleft = (int(self.x), int(self.y))
         
         # Update animation
-        self.update_animation()
+        self.updateAnimation()
 
     def fire(self):
         """Called when the enemy fires a bullet"""
-        self.start_attack_animation()
+        self.startAttackAnimation()
         return True  # Return True to indicate firing action taken
 
 
-    def take_damage(self, damage: int):
+    def takeDamage(self, damage: int):
         """Reduces health and marks enemy as destroyed if needed."""
         self.health -= damage
         if self.health <= 0:
@@ -229,7 +229,7 @@ class Enemy(pygame.sprite.Sprite):
             
     def update(self):
         """Update method required for sprite groups"""
-        self.update_animation()
+        self.updateAnimation()
 
     def draw(self, screen):
         """Draws the enemy, displaying attack above and health in the middle."""

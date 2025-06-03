@@ -3,12 +3,13 @@ import random
 from character import Character
 from enemy import Enemy
 from damage import Damage
-from gameplay import  EnemyDamageGameplay, CharacterDamageGameplay
+from gameplay import  enemyDamageGameplay, characterDamageGameplay
 from bullet import Bullet
 from damage_text import DamageText
 from gcd import gcd
 from game_over import gameOver
-from start_menu import start_menu
+from start_menu import startMenu
+from fire_bullets_from import fireBulletsFrom
 
 pygame.init()
 
@@ -33,48 +34,6 @@ enemy_boundary = pygame.Rect(WIDTH // 2, 0, WIDTH // 2, HEIGHT)
 
 
 backgrounds = [soldier_background, general_background, final_boss_background]
-
-def fire_bullets_from(enemy, bullets_list):
-    if enemy.attack_animation_complete:
-        enemy.start_attack_animation()
-
-        num_bullets = 1
-        spread_gap = 5
-
-        if hasattr(enemy, "is_final_boss") and enemy.is_final_boss:
-            num_bullets = 5
-            spread_gap = 10
-        elif hasattr(enemy, "is_general") and enemy.is_general:
-            num_bullets = 2
-            spread_gap = 40
-
-        start_offset = -((num_bullets - 1) // 2) * spread_gap
-
-        for i in range(num_bullets):
-            y_offset = start_offset + i * spread_gap
-            x = enemy.x - 10
-            y = enemy.y + y_offset
-
-            # Set direction for each bullet
-            if hasattr(enemy, "is_final_boss") and enemy.is_final_boss:
-                # Top bullet
-                if i == 0:
-                    bullet = Bullet(x, y, dx=-4, dy=-4, owner=enemy)  # up-left
-                # Middle bullet
-                elif i == 1:
-                    bullet = Bullet(x, y, dx=-4, dy=-2, owner=enemy)
-                elif i == 2:
-                    bullet = Bullet(x, y, dx=-4, dy=0, owner=enemy)  # straight left
-                # Bottom bullet
-                elif i == 3:
-                    bullet = Bullet(x, y, dx=-4, dy=2, owner=enemy)  # down-left
-                else:
-                    bullet = Bullet(x, y, dx=-4, dy=4, owner=enemy)
-            else:
-                bullet = Bullet(x, y, dx=-5, dy=0, owner=enemy)  # straight bullets for others
-
-            bullets_list.append(bullet)
-
 
 
 def main():
@@ -122,19 +81,19 @@ def main():
             if event.type == pygame.KEYDOWN :
                     if event.key == pygame.K_SPACE and character.alive:
                         if character.attack_animation_complete:
-                            character.start_attack_animation()
+                            character.startAttackAnimation()
                             character_bullets.append(Bullet(character.x + 20, character.y + 10,0,0, owner=character))
 
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if character.attack_animation_complete:
-                    character.start_attack_animation()
+                    character.startAttackAnimation()
                     character_bullets.append(Bullet(character.x + 20, character.y + 10,0,0, owner=character))
 
         current_time = pygame.time.get_ticks()
         for enemy in current_wave:
             if enemy.alive and current_time - enemy.last_fire_time >= enemy.fire_delay:
-                fire_bullets_from(enemy, enemy_bullets)
+                fireBulletsFrom(enemy, enemy_bullets)
                 enemy.last_fire_time = current_time
                 enemy.fire_delay = random.randint(500, 1500)
 
@@ -162,7 +121,7 @@ def main():
                 for bullet in character_bullets[:]:
                     if bullet.rect.colliderect(enemy.rect):
                         character_bullets.remove(bullet)
-                        EnemyDamageGameplay(enemy, character)
+                        enemyDamageGameplay(enemy, character)
                         if enemy.alive:
                             character_damage_texts.append(DamageText(
                                 enemy.x + 10, enemy.y - 20,
@@ -173,7 +132,7 @@ def main():
             for bullet in enemy_bullets[:]:
                 if bullet.rect.colliderect(character.rect):
                     enemy_bullets.remove(bullet)
-                    CharacterDamageGameplay( character, bullet.owner)
+                    characterDamageGameplay( character, bullet.owner)
                     if character.alive:
                         enemy_damage_texts.append(DamageText(character.x + 10, character.y + -20, Damage.damage(enemy.attack, character.health)))
             
@@ -252,11 +211,11 @@ def main():
 
     pygame.quit()
 
-def run_game():
+def runGame():
     while True:
-        start_menu(screen, backgrounds, WIDTH, HEIGHT)
+        startMenu(screen, backgrounds, WIDTH, HEIGHT)
         main()
 
 if __name__ == "__main__":
     pygame.init()
-    run_game()
+    runGame()

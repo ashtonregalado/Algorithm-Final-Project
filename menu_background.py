@@ -9,7 +9,7 @@ last_fade_time = pygame.time.get_ticks()
 fade_interval = 1500  # milliseconds
 
 
-def draw_background(screen, backgrounds):
+def drawBackground(screen, backgrounds):
     global current_bg_index, next_bg_index, fade_alpha, fading, last_fade_time
 
     now = pygame.time.get_ticks()

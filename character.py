@@ -44,10 +44,10 @@ class Character(pygame.sprite.Sprite):
             running_folder = os.path.join(base_folder, "Running")
             attack_folder = os.path.join(base_folder, "Slashing in The Air")
 
-            self.idle_frames = self._load_animation_frames(idle_folder, width, height)
-            self.running_frames = self._load_animation_frames(running_folder, width, height)
+            self.idle_frames = self.loadAnimationFrames(idle_folder, width, height)
+            self.running_frames = self.loadAnimationFrames(running_folder, width, height)
 
-            self.attack_frames = self._load_animation_frames(attack_folder, width, height)
+            self.attack_frames = self.loadAnimationFrames(attack_folder, width, height)
             if self.running_frames:
                 self.image = self.running_frames[0]
             else:
@@ -61,7 +61,7 @@ class Character(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect(topleft=(x, y))
 
-    def _load_animation_frames(self, folder_path, width, height):
+    def loadAnimationFrames(self, folder_path, width, height):
         """Helper method to load animation frames from a folder"""
         frames = []
         try:
@@ -80,7 +80,7 @@ class Character(pygame.sprite.Sprite):
             
         return frames
     
-    def start_attack_animation(self):
+    def startAttackAnimation(self):
         """Start the attack animation sequence"""
         # Always allow starting a new attack animation
         self.is_attacking = True
@@ -89,7 +89,7 @@ class Character(pygame.sprite.Sprite):
         self.animation_timer = 0
         self.attack_animation_complete = False
 
-    def update_animation(self):
+    def updateAnimation(self):
         """Update the current animation frame based on state"""
         # Get the current animation frames based on state
         if self.animation_state == "attacking":
@@ -127,10 +127,10 @@ class Character(pygame.sprite.Sprite):
 
 
 
-    def full_health(self):
+    def fullHealth(self):
         return self.health
 
-    def attack_power(self):
+    def attackPower(self):
         return self.attack
     
     #still has an error when the character touches the edge of the screen, the running animation then plays even if you are in idle
@@ -186,10 +186,10 @@ class Character(pygame.sprite.Sprite):
 
 
         self.rect.topleft = (self.x, self.y)
-        self.update_animation()
+        self.updateAnimation()
 
 
-    def take_damage(self, damage: int):
+    def takeDamage(self, damage: int):
         """Reduces health and marks enemy as destroyed if needed."""
         self.health -= damage
         if self.health <= 0:
@@ -197,7 +197,7 @@ class Character(pygame.sprite.Sprite):
             self.alive = False  
             
     def update(self):
-        self.update_animation()
+        self.updateAnimation()
 
 
     def draw(self, screen):

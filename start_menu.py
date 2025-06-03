@@ -1,7 +1,7 @@
 import pygame
-from menu_background import draw_background
+from menu_background import drawBackground
 
-def start_menu(screen, backgrounds, WIDTH, HEIGHT):
+def startMenu(screen, backgrounds, WIDTH, HEIGHT):
     font_title = pygame.font.Font("assets/PixeloidSans.ttf", 72)
     font_button = pygame.font.Font("assets/PixeloidMono.ttf", 22)
 
@@ -15,7 +15,7 @@ def start_menu(screen, backgrounds, WIDTH, HEIGHT):
     button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
 
     while True:
-        draw_background(screen, backgrounds)
+        drawBackground(screen, backgrounds)
 
         # Draw title
         screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, HEIGHT // 4))

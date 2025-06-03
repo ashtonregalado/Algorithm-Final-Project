@@ -24,7 +24,6 @@ def gameOver(screen, WIDTH, HEIGHT, winner):
 
         screen.fill((0, 0, 0))  # Clear screen with black background
 
-
         # Draw texts
         # Draw "Game Over" title
         screen.blit(title_text, (WIDTH // 2 - title_text.get_width() // 2, HEIGHT // 4))
